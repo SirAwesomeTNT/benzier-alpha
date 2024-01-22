@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from math import sqrt
 from numpy.linalg import inv
 
@@ -53,3 +54,22 @@ yP = np.matmul(np.matmul(np.matmul(inv(m), inv(np.matmul(s.T, s))), s.T), y)
 p = np.hstack((xP, yP))
 pRounded = np.round(p, 2)
 print("Matrix p, which stores final control points for the Bezier curve:\n" + f"{pRounded}")
+
+# Plot the original points
+plt.scatter(x, y, color='blue', label='Original Points')
+
+# Plot the fitted Bézier curve
+t_values = np.linspace(0, 1, 100)
+bezier_curve = np.array([[(1-t)**3, 3*t*(1-t)**2, 3*t**2*(1-t), t**3] for t in t_values])
+fit_curve = np.dot(bezier_curve, p)
+
+plt.plot(fit_curve[:, 0], fit_curve[:, 1], color='red', label='Fitted Bézier Curve')
+
+# Add labels and legend
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.title('Cubic Bézier Curve Fitting')
+
+# Show the plot
+plt.show()
