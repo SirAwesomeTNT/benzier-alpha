@@ -17,12 +17,12 @@ print("Matrix y, which stores the y-values of our parent curve:\n" + f"{y}\n")
 d = np.zeros(x.size)
 # this loop doesn't iterate over the first value in d, since d[0] = 0
 for i in range (1, x.size):
-    # a^2 + b^2 = c^2, solving for c
     x1 = np.ndarray.item(x[i])
     x2 = np.ndarray.item(x[i-1])
     y1 = np.ndarray.item(y[i])
     y2 = np.ndarray.item(y[i-1])
-    d[i] = d[i-1] + sqrt((pow(x1-x2, 2) + pow(y1-y2, 2)))
+    # a^2 + b^2 = c^2, solving for c
+    d[i] = d[i-1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 print("Matrix d, which stores the distance from the start of the parent curve to each consecutive point:\n" + f"{d}\n")
 
 # calculate the values for the b (Bezier index) matrix, which stores the respective indexes of the points on the cubic Bezier curve
@@ -39,12 +39,12 @@ print("These are also the curve's t values that most closely corrospond to each 
 # the last column is filled with ones (b[i]^0)
 s = np.ones((x.size, 4))
 for i in range(0, b.size):
-    s[i, 0] = pow(b[i], 3)
-    s[i, 1] = pow(b[i], 2)
-    s[i, 2] = pow(b[i], 1)
+    s[i, 0] = b[i] ** 3
+    s[i, 1] = b[i] ** 2
+    s[i, 2] = b[i] ** 1
 print("Matrix s, which stores the values needed for a least squares regression analysis:\n" + f"{s}\n")
 
-# calculate the x and y values for the p array that gives us our final control points
+# calculate the values for the p array that gives us the x and y locations of the final control points
 # using the following equation, points are calculated: inv(m) * inv(s.T * s) * s.T * (y or x)
 # actual calculations
 xP = np.matmul(np.matmul(np.matmul(inv(m), inv(np.matmul(s.T, s))), s.T), x)
@@ -54,6 +54,12 @@ yP = np.matmul(np.matmul(np.matmul(inv(m), inv(np.matmul(s.T, s))), s.T), y)
 p = np.hstack((xP, yP))
 pRounded = np.round(p, 2)
 print("Matrix p, which stores final control points for the Bezier curve:\n" + f"{pRounded}")
+
+# Create a figure with two subplots (1 row, 2 columns)
+plt.figure(figsize=(12, 5))  # Adjust the figure size if needed
+
+# Subplot 1: Original Bézier curve without control points
+plt.subplot(1, 2, 1)
 
 # Plot the original points
 plt.scatter(x, y, color='blue', label='Original Points')
@@ -69,7 +75,32 @@ plt.plot(fit_curve[:, 0], fit_curve[:, 1], color='red', label='Fitted Bézier Cu
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.legend()
-plt.title('Cubic Bézier Curve Fitting')
+plt.title('Original Bézier Curve without Control Points')
 
-# Show the plot
+# Subplot 2: Bézier curve with control points
+plt.subplot(1, 2, 2)
+
+# Plot the original points
+plt.scatter(x, y, color='blue', label='Original Points')
+
+# Plot the fitted Bézier curve
+plt.plot(fit_curve[:, 0], fit_curve[:, 1], color='red', label='Fitted Bézier Curve')
+
+# Plot the control points
+plt.scatter(pRounded[:, 0], pRounded[:, 1], color='green', label='Control Points')
+
+# Draw thin line segments between adjacent control points
+for i in range(pRounded.shape[0] - 1):
+    plt.plot([pRounded[i, 0], pRounded[i + 1, 0]], [pRounded[i, 1], pRounded[i + 1, 1]], color='gray', linestyle='--')
+
+# Add labels and legend
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.title('Bézier Curve with Control Points')
+
+# Adjust layout to prevent overlapping titles
+plt.tight_layout()
+
+# Show the figure
 plt.show()
