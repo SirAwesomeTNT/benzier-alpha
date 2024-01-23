@@ -3,9 +3,7 @@ import matplotlib.pyplot as plt
 from math import sqrt
 from numpy.linalg import inv
 
-# method to interpolate points from a set of original points
 def interpolatePointsRegularIntervals(xOrig, yOrig, totalPoints):
-
     # Fill x-axis with regularly spaced values
     xNew = np.linspace(xOrig[0], xOrig[-1], totalPoints)
 
@@ -23,45 +21,31 @@ def interpolatePointsRegularIntervals(xOrig, yOrig, totalPoints):
         # Update yNew array
         yNew[mask] = yInterp
 
-    # # Plot the result
-    # plt.scatter(xNew, yNew, color='red', label='Interpolated Points', s=8)
-    # plt.scatter(xOrig, yOrig, color='blue', label='Original Points')
-
-    # # Add labels and legend
-    # plt.xlabel('X')
-    # plt.ylabel('Y')
-    # plt.legend()
-    # plt.title('Interpolated Points with Original Points')
-
-    # # Show the plot
-    # plt.show()
-
     # Return the xNew and yNew arrays
     return xNew, yNew
 
-# method to calculate the cubic Bezier curve of best fit
 def calculateLeastSquaresBezier(x, y):
     # calculate the values for the d (distance) matrix, which stores the distance from the start of the parent curve to each consecutive point
     d = np.zeros(x.size)
     # this loop doesn't iterate over the first value in d, since d[0] = 0
-    for i in range (1, x.size):
+    for i in range(1, x.size):
         x1 = np.ndarray.item(x[i])
-        x2 = np.ndarray.item(x[i-1])
+        x2 = np.ndarray.item(x[i - 1])
         y1 = np.ndarray.item(y[i])
-        y2 = np.ndarray.item(y[i-1])
+        y2 = np.ndarray.item(y[i - 1])
         # a^2 + b^2 = c^2, solving for c
-        d[i] = d[i-1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+        d[i] = d[i - 1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     print("Matrix d, which stores the distance from the start of the parent curve to each consecutive point:\n" + f"{d}\n")
 
     # calculate the values for the b (Bezier index) matrix, which stores the respective indexes of the points on the cubic Bezier curve
     b = np.zeros(x.size)
     # this loop doesn't iterate over the first value in b, since b[0] = 0
-    for i in range (1, x.size):
+    for i in range(1, x.size):
         # b[i] = length of most recent segment / length of all segments
         # broken version (according to Herold's formulas): b[i] = (d[i] - d[i-1]) / d[d.size - 1]
         b[i] = (d[i]) / d[d.size - 1]
     print("Matrix b, which stores the percentages of each point's distance along on the Bezier curve.")
-    print("These are also the curve's t values that most closely corrospond to each original point:\n" + f"{b}\n")
+    print("These are also the curve's t values that most closely correspond to each original point:\n" + f"{b}\n")
 
     # calculate the values for s (least squares) matrix, which stores the values needed for a least squares regression analysis
     # the last column is filled with ones (b[i]^0)
@@ -85,21 +69,20 @@ def calculateLeastSquaresBezier(x, y):
 
     return p, pRounded
 
-### GLOBAL VARIABLE DECLARATIONS###
-# define matrix m, which contains coefficients for the cubic Bezier curve
+# Define matrix m, which contains coefficients for the cubic Bezier curve
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 print("Matrix m, which which contains coefficients for the cubic Bezier curve:\n" + f"{m}\n")
 
-# define matrix x and y, in which we will store the points of our parent curve (the curve we are modeling)
-x = np.array([[0], [1], [2], [3], [4], [5]])
-y = np.array([[4], [1], [0], [1], [4], [9]])
-print("Matrix x, which stores the x-values of our parent curve:\n" + f"{x}\n")
-print("Matrix y, which stores the y-values of our parent curve:\n" + f"{y}\n")
+# Define matrix xOrig and yOrig, in which we will store the points of our parent curve (the curve we are modeling)
+xOrig = np.array([[0], [1], [2], [3], [4], [5]])
+yOrig = np.array([[4], [1], [0], [1], [4], [9]])
+print("Matrix xOrig, which stores the x-values of our parent curve:\n" + f"{xOrig}\n")
+print("Matrix yOrig, which stores the y-values of our parent curve:\n" + f"{yOrig}\n")
 
-# call interpolation method
-x, y = interpolatePointsRegularIntervals(x, y, 100)
+# Call interpolation method
+x, y = interpolatePointsRegularIntervals(xOrig, yOrig, 100)
 
-# calculate points of best-fit cubic bezier curve
+# Calculate points of best-fit cubic Bezier curve
 p, pRounded = calculateLeastSquaresBezier(x, y)
 
 # Create a figure with two subplots (1 row, 2 columns)
@@ -112,11 +95,11 @@ plt.subplot(1, 2, 1)
 plt.scatter(x, y, color='blue', label='Original Points')
 
 # Plot the fitted Bézier curve
-t_values = np.linspace(0, 1, 100)
-bezier_curve = np.array([[(1-t)**3, 3*t*(1-t)**2, 3*t**2*(1-t), t**3] for t in t_values])
-fit_curve = np.dot(bezier_curve, p)
+tValues = np.linspace(0, 1, 100)
+bezierCurve = np.array([[(1 - t) ** 3, 3 * t * (1 - t) ** 2, 3 * t ** 2 * (1 - t), t ** 3] for t in tValues])
+fitCurve = np.dot(bezierCurve, p)
 
-plt.plot(fit_curve[:, 0], fit_curve[:, 1], color='red', label='Fitted Bézier Curve')
+plt.plot(fitCurve[:, 0], fitCurve[:, 1], color='red', label='Fitted Bézier Curve')
 
 # Add labels and legend
 plt.xlabel('X')
@@ -131,7 +114,7 @@ plt.subplot(1, 2, 2)
 plt.scatter(x, y, color='blue', label='Original Points')
 
 # Plot the fitted Bézier curve
-plt.plot(fit_curve[:, 0], fit_curve[:, 1], color='red', label='Fitted Bézier Curve')
+plt.plot(fitCurve[:, 0], fitCurve[:, 1], color='red', label='Fitted Bézier Curve')
 
 # Plot the control points
 plt.scatter(pRounded[:, 0], pRounded[:, 1], color='green', label='Control Points')
