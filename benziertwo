@@ -1,31 +1,41 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Data for the first plot
-x1 = np.linspace(0, 10, 100)
-y1 = np.sin(x1)
+def plot_interpolated_points(xorig, yorig, totalPoints):
+    # Determine spacing needed along the x-axis
+    x_spacing = (xorig[-1] - xorig[0]) / (totalPoints - 1)
 
-# Data for the second plot
-x2 = np.linspace(0, 5, 50)
-y2 = np.cos(x2)
+    # Fill x-axis with regularly spaced values
+    xnew = np.linspace(xorig[0], xorig[-1], totalPoints)
 
-# Create a figure with two subplots (1 row, 2 columns)
-plt.figure(figsize=(10, 5))  # Adjust the figure size if needed
+    # Initialize array for ynew
+    ynew = np.zeros_like(xnew)
 
-# Subplot 1
-plt.subplot(1, 2, 1)
-plt.plot(x1, y1, label='sin(x)')
-plt.title('Subplot 1: sin(x)')
-plt.legend()
+    # Calculate y-values on line segments connecting the original points
+    for i in range(len(xorig) - 1):
+        mask = (xnew >= xorig[i]) & (xnew <= xorig[i + 1])
+        x_segment = xnew[mask]
 
-# Subplot 2
-plt.subplot(1, 2, 2)
-plt.plot(x2, y2, label='cos(x)')
-plt.title('Subplot 2: cos(x)')
-plt.legend()
+        # Linear interpolation for y-values
+        y_interp = yorig[i] + (yorig[i + 1] - yorig[i]) / (xorig[i + 1] - xorig[i]) * (x_segment - xorig[i])
 
-# Adjust layout to prevent overlapping titles
-plt.tight_layout()
+        # Update ynew array
+        ynew[mask] = y_interp
 
-# Show the figure
-plt.show()
+    # Plot the result
+    plt.scatter(xnew, ynew, color='red', label='Interpolated Points', s=8)
+    plt.scatter(xorig, yorig, color='blue', label='Original Points')
+
+    # Add labels and legend
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+    plt.title('Interpolated Points with Original Points')
+
+    # Show the plot
+    plt.show()
+
+# Example usage
+xorig = np.array([0, 1, 2, 3, 4, 5])
+yorig = np.array([4, 1, 0, 1, 4, 9])
+plot_interpolated_points(xorig, yorig, 100)
