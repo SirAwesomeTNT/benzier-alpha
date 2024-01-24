@@ -66,10 +66,14 @@ def calculateLeastSquaresBezier(x, y):
 # Define matrix m, which contains coefficients for the cubic Bezier curve
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 
+# Define the number of points
+numPoints = 4
+
 # Define matrix xOrig and yOrig, in which we will store the points of our parent curve (the curve we are modeling)
 # yOrig is random, between 0 and 5
-xOrig = np.array([[0], [1], [2], [3], [4], [5]])
-yOrig = np.random.uniform(1, 3, size=(6, 1))
+xOrig = np.linspace(0, 1, numPoints, endpoint=False).reshape(-1, 1)
+yOrig = np.random.uniform(1, 3, size=(numPoints, 1))
+
 
 # With the original 6 points, calculate points of best-fit cubic Bezier curve
 pOrig = calculateLeastSquaresBezier(xOrig, yOrig)
@@ -81,24 +85,10 @@ xInter, yInter = interpolatePointsRegularIntervals(xOrig, yOrig, 100)
 pInter = calculateLeastSquaresBezier(xInter, yInter)
 
 # Create a matplotlib figure with three subplots
-plt.figure(figsize=(18, 6))
+plt.figure(figsize=(18, 8.5))
 
-# Subplot 1: Original and Interpolated Points
-plt.subplot(1, 3, 1)
-
-# Plot Original Points
-plt.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
-
-# Plot Interpolated Points
-plt.scatter(xInter, yInter, color='red', label='Interpolated Points', s=8)
-
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.legend()
-plt.title('Original and Interpolated Points')
-
-# Subplot 2: Bézier Curves
-plt.subplot(1, 3, 2)
+# Subplot 1: Bézier Curves with Control Points
+plt.subplot(2, 3, 1)
 
 # Plot Original Points
 plt.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
@@ -116,26 +106,6 @@ bezierCurveInter = np.array([[(1 - t) ** 3, 3 * t * (1 - t) ** 2, 3 * t ** 2 * (
 fitCurveInter = np.dot(bezierCurveInter, pInter)
 plt.plot(fitCurveInter[:, 0], fitCurveInter[:, 1], color='purple', label='Bézier Curve (Interpolated)')
 
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.legend()
-plt.title('Bézier Curves')
-
-# Subplot 3: Bézier Curves with Control Points
-plt.subplot(1, 3, 3)
-
-# Plot Original Points
-plt.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
-
-# Plot Interpolated Points
-plt.scatter(xInter, yInter, color='red', label='Interpolated Points', s=8)
-
-# Plot Bézier Curves
-plt.plot(fitCurveOrig[:, 0], fitCurveOrig[:, 1], color='green', label='Bézier Curve (Original)')
-plt.plot(fitCurveInter[:, 0], fitCurveInter[:, 1], color='purple', label='Bézier Curve (Interpolated)')
-
-print(pOrig)
-
 # Plot Control Points
 plt.scatter(pOrig[:, 0], pOrig[:, 1], color='lightblue', label='Control Points (Original)', s=30)
 plt.scatter(pInter[:, 0], pInter[:, 1], color='lightcoral', label='Control Points (Interpolated)', s=30)
@@ -147,10 +117,53 @@ for i in range(pOrig.shape[0] - 1):
 
 plt.xlabel('X')
 plt.ylabel('Y')
-plt.legend()
 plt.title('Bézier Curves with Control Points')
 
-# Adjust layout to prevent overlapping titles
+# Subplot 2: Bézier Curves
+plt.subplot(2, 3, 2, sharey=plt.gca())
+
+# Plot Original Points
+plt.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
+
+# Plot Interpolated Points
+plt.scatter(xInter, yInter, color='red', label='Interpolated Points', s=8)
+
+# Plot Bézier Curves
+plt.plot(fitCurveOrig[:, 0], fitCurveOrig[:, 1], color='green', label='Bézier Curve (Original)')
+plt.plot(fitCurveInter[:, 0], fitCurveInter[:, 1], color='purple', label='Bézier Curve (Interpolated)')
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Bézier Curves')
+
+# Subplot 3: Original and Interpolated Points
+plt.subplot(2, 3, 3, sharey=plt.gca())
+
+# Plot Original Points
+plt.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
+
+# Plot Interpolated Points
+plt.scatter(xInter, yInter, color='red', label='Interpolated Points', s=8)
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Original and Interpolated Points')
+
+plt.subplot(2, 1, 2)
+plt.axis('off')  # Turn off axis for the legend subplot
+
+# Plot dummy elements to create the legend
+plt.plot([], [], label='Original Points', color='blue', marker='o')
+plt.plot([], [], label='Interpolated Points', color='red', marker='o')
+plt.plot([], [], label='Bézier Curve (Original)', color='green')
+plt.plot([], [], label='Bézier Curve (Original) Control Points', color='lightblue', marker='o')
+plt.plot([], [], label='Bézier Curve (Interpolated)', color='purple')
+plt.plot([], [], label='Bézier Curve (Interpolated) Control Points', color='lightcoral', marker='o')
+
+# Display the legend
+plt.legend(fontsize='medium', loc='center', ncol=1)
+
+# Tighten the layout
 plt.tight_layout()
 
 # Show the figure
