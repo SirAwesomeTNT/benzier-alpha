@@ -71,11 +71,11 @@ def fill_subplot(ax, show_original=True, show_interpolated=True, show_orig_contr
     
     # Plot Original Points
     if show_original:
-        ax.scatter(xOrig, yOrig, color='blue', label='Original Points', s=20)
+        ax.scatter(xOrig, yOrig, color='blue', label='Original Points', s=30)
 
     # Plot Interpolated Points
     if show_interpolated:
-        ax.scatter(xInter, yInter, color='red', label='Interpolated Points', s=8)
+        ax.scatter(xInter, yInter, color='red', label='Interpolated Points', s=6)
 
     # Plot Bézier Curves
     tValues = np.linspace(0, 1, 100)
@@ -130,17 +130,17 @@ fig, axs = plt.subplots(2, 3, figsize=(18, 8.75), sharex='all', sharey='all')
 ax1, ax2, ax3, ax4, ax5, ax6 = axs.flatten()
 
 # Fill subplots using the new method
-fill_subplot(ax1)
-fill_subplot(ax2, show_original=False)
-fill_subplot(ax3, show_interpolated=False)
-fill_subplot(ax4, show_orig_control=False, show_interpol_control=False)
-fill_subplot(ax5, show_orig_control=False, show_interpol_control=False, show_interpolated=False, show_original=False)
+fill_subplot(ax1, show_interpolated=False, show_interpol_control=False, show_orig_control=False)
+fill_subplot(ax2, show_interpolated=False, show_interpol_control=False)
+fill_subplot(ax3)
+fill_subplot(ax4, show_orig_control=False, show_interpol_control=False, show_original=False)
+fill_subplot(ax5, show_orig_control=False, show_original=False)
 
 # Display the legend in the bottom rightmost subplot
 ax6.axis('off')
 
 # Grab the labels from ax1, which has everything turned on
-handles, labels = ax1.get_legend_handles_labels()
+handles, labels = ax3.get_legend_handles_labels()
 
 # use the labels and handels from ax1 to populate the legend appearing in ax6 so that the legend isn't blank
 ax6.legend(handles, labels, fontsize='medium', loc='center')
