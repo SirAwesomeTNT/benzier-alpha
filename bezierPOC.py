@@ -27,6 +27,16 @@ def interpolatePointsRegularIntervals(xOrig, yOrig, totalPoints):
     # Return the xNew and yNew arrays
     return xNew, yNew
 
+def calculateBezierPoint(b, controlPoints):
+
+    bezierPoints = np.zeros((len(b), 2))
+
+    for n in range(len(b)):
+        bezierPoints[n, 0] = (1 - b[n])**3 * controlPoints[0, 0] + 3 * (1 - b[n])**2 * b[n] * controlPoints[1, 0] + 3 * (1 - b[n]) * b[n]**2 * controlPoints[2, 0] + b[n]**3 * controlPoints[3, 0]
+        bezierPoints[n, 1] = (1 - b[n])**3 * controlPoints[0, 1] + 3 * (1 - b[n])**2 * b[n] * controlPoints[1, 1] + 3 * (1 - b[n]) * b[n]**2 * controlPoints[2, 1] + b[n]**3 * controlPoints[3, 1]
+
+    return bezierPoints
+
 def calculateLeastSquaresBezier(x, y):
     # calculate the values for the d (distance) matrix, which stores the distance from the start of the parent curve to each consecutive point
     d = np.zeros(x.size)
@@ -38,14 +48,15 @@ def calculateLeastSquaresBezier(x, y):
         y2 = np.ndarray.item(y[i - 1])
         # a^2 + b^2 = c^2, solving for c
         d[i] = d[i - 1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    print(f'd matrix:\n{d}')
 
     # calculate the values for the b (Bezier index) matrix, which stores the respective indexes of the points on the cubic Bezier curve
     b = np.zeros(x.size)
     # this loop doesn't iterate over the first value in b, since b[0] = 0
     for i in range(1, x.size):
         # b[i] = length of most recent segment / length of all segments
-        # broken version (according to Herold's formulas): b[i] = (d[i] - d[i-1]) / d[d.size - 1]
         b[i] = (d[i]) / d[d.size - 1]
+    print(f'b matrix:\n{b}')
 
     # calculate the values for s (least squares) matrix, which stores the values needed for a least squares regression analysis
     # the last column is filled with ones (b[i]^0)
@@ -54,6 +65,7 @@ def calculateLeastSquaresBezier(x, y):
         s[i, 0] = b[i] ** 3
         s[i, 1] = b[i] ** 2
         s[i, 2] = b[i] ** 1
+    print(f's matrix:\n{s}')
 
     # calculate the values for the p array that gives us the x and y locations of the final control points
     # using the following equation, points are calculated: inv(m) * inv(s.T * s) * s.T * (y or x)
@@ -62,9 +74,15 @@ def calculateLeastSquaresBezier(x, y):
     yP = np.matmul(np.matmul(np.matmul(inv(m), inv(np.matmul(s.T, s))), s.T), y)
 
     # create matrix p, in which control points will be stored
-    p = np.hstack((xP, yP))
+    controlPoints = np.hstack((xP, yP))
 
-    return p
+    print(f"\nControl Points:\n{controlPoints}")
+
+    print(f"\nBezier Points: \n{calculateBezierPoint(b, controlPoints)}")
+
+    print(f"\nOriginal Points:\n{np.hstack((x, y))}")
+
+    return controlPoints
 
 def fill_subplot(ax, show_original=True, show_interpolated=True, show_orig_control=True, show_interpol_control=True):
     global xOrig, yOrig, xInter, yInter, origCtrlPoints, interpolCtrlPoints
@@ -104,6 +122,7 @@ def fill_subplot(ax, show_original=True, show_interpolated=True, show_orig_contr
         if show_interpol_control:
             ax.plot([interpolCtrlPoints[i, 0], interpolCtrlPoints[i + 1, 0]], [interpolCtrlPoints[i, 1], interpolCtrlPoints[i + 1, 1]], color='gray', linestyle='--', linewidth=1)
 
+
 # Define matrix m, which contains coefficients for the cubic Bezier curve
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 
@@ -111,14 +130,14 @@ m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 numPoints = 4
 
 # Define matrix xOrig and yOrig
-xOrig = np.linspace(0, 1, numPoints, endpoint=False).reshape(-1, 1)
-yOrig = np.random.uniform(1, 3, size=(numPoints, 1))
+xOrig = np.linspace(0, 5, numPoints, endpoint=False).reshape(-1, 1)
+yOrig = np.random.uniform(0, 5, size=(numPoints, 1))
 
 # With the original points, calculate points of best-fit cubic Bezier curve
 origCtrlPoints = calculateLeastSquaresBezier(xOrig, yOrig)
 
 # Call interpolation method
-xInter, yInter = interpolatePointsRegularIntervals(xOrig, yOrig, 100)
+xInter, yInter = interpolatePointsRegularIntervals(xOrig, yOrig, 6)
 
 # With the interpolated points, calculate points of best-fit cubic Bezier curve
 interpolCtrlPoints = calculateLeastSquaresBezier(xInter, yInter)
