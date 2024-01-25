@@ -27,7 +27,7 @@ def interpolatePointsRegularIntervals(xOrig, yOrig, totalPoints):
     # Return the xNew and yNew arrays
     return xNew, yNew
 
-def calculateBezierPoint(b, controlPoints):
+def calculateBezierPoints(b, controlPoints):
 
     bezierPoints = np.zeros((len(b), 2))
 
@@ -36,6 +36,17 @@ def calculateBezierPoint(b, controlPoints):
         bezierPoints[n, 1] = (1 - b[n])**3 * controlPoints[0, 1] + 3 * (1 - b[n])**2 * b[n] * controlPoints[1, 1] + 3 * (1 - b[n]) * b[n]**2 * controlPoints[2, 1] + b[n]**3 * controlPoints[3, 1]
 
     return bezierPoints
+
+def calculateLeastSquaresSum(originalPoints, bezierPoints):
+    
+    sum_squared_diff = 0.0
+
+    for n in range(len(originalPoints)):
+        # Calculate squared difference for each point and add to the sum
+        diff_squared = np.sum((originalPoints[n, :] - bezierPoints[n, :]) ** 2)
+        sum_squared_diff += diff_squared
+
+    return sum_squared_diff
 
 def calculateLeastSquaresBezier(x, y):
     # calculate the values for the d (distance) matrix, which stores the distance from the start of the parent curve to each consecutive point
@@ -78,9 +89,11 @@ def calculateLeastSquaresBezier(x, y):
 
     print(f"\nControl Points:\n{controlPoints}")
 
-    print(f"\nBezier Points: \n{calculateBezierPoint(b, controlPoints)}")
+    print(f"\nBezier Points: \n{calculateBezierPoints(b, controlPoints)}")
 
-    print(f"\nOriginal Points:\n{np.hstack((x, y))}")
+    print(f"\nLeast Squares Sum:\n{calculateLeastSquaresSum(calculateBezierPoints(b, controlPoints), np.hstack((x, y)))}")
+
+    # print(f"\nOriginal Points:\n{np.hstack((x, y))}")
 
     return controlPoints
 
@@ -122,7 +135,6 @@ def fill_subplot(ax, show_original=True, show_interpolated=True, show_orig_contr
         if show_interpol_control:
             ax.plot([interpolCtrlPoints[i, 0], interpolCtrlPoints[i + 1, 0]], [interpolCtrlPoints[i, 1], interpolCtrlPoints[i + 1, 1]], color='gray', linestyle='--', linewidth=1)
 
-
 # Define matrix m, which contains coefficients for the cubic Bezier curve
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 
@@ -130,8 +142,8 @@ m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 numPoints = 4
 
 # Define matrix xOrig and yOrig
-xOrig = np.linspace(0, 5, numPoints, endpoint=False).reshape(-1, 1)
-yOrig = np.random.uniform(0, 5, size=(numPoints, 1))
+xOrig = np.linspace(0, 100, numPoints, endpoint=False).reshape(-1, 1)
+yOrig = np.random.uniform(0, 100, size=(numPoints, 1))
 
 # With the original points, calculate points of best-fit cubic Bezier curve
 origCtrlPoints = calculateLeastSquaresBezier(xOrig, yOrig)
