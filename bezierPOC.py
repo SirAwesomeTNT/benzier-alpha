@@ -200,7 +200,7 @@ m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 
 # Define the number of points
 origNumPoints = 4
-interNumPoints = 10
+interNumPoints = 100
 
 # Define matrix xOrig and yOrig (randomly generate original points)
 xOrig = np.linspace(0, 100, origNumPoints, endpoint=False).reshape(-1, 1)
