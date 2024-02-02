@@ -23,15 +23,9 @@ def ffprobe(file_path):
         output_str = out.decode("utf-8")
 
         # Parse the JSON output
-        media_info = json.loads(output_str)
+        audio_info = json.loads(output_str)
 
-        return media_info
-
-# Example usage:
-songPath = openSongAtLocation("songLocation.txt")
-audio_info = ffprobe(songPath)
-
-relevantInfo = {'format_name': '',
+        relevantInfo = {'format_name': '',
                 'size': '',
                 'bit_rate': '',
                 'duration_ts': '',
@@ -39,25 +33,29 @@ relevantInfo = {'format_name': '',
                 'sample_fmt': '',
                 'sample_rate': ''}
 
-if audio_info:
-    # Accessing format information
-    format_info = audio_info.get("format", {})
-    if format_info:
-        for key in relevantInfo:
-            relevantInfo[key] = format_info.get(key, "")
+    if audio_info:
+        # Accessing format information
+        format_info = audio_info.get("format", {})
+        if format_info:
+            for key in relevantInfo:
+                relevantInfo[key] = format_info.get(key, "")
 
-    # Accessing stream information
-    streams = audio_info.get("streams", [])
-    for stream in streams:
-        for key in relevantInfo:
-            if key in stream:
-                relevantInfo[key] = stream[key]
-        break  # Process only the first stream
+        # Accessing stream information
+        streams = audio_info.get("streams", [])
+        for stream in streams:
+            for key in relevantInfo:
+                if key in stream:
+                    relevantInfo[key] = stream[key]
+            break  # Process only the first stream
 
-else:
-    print("FFprobe failed to retrieve media information.")
+    else:
+        print("FFprobe failed to retrieve media information.")
 
-# Now you can access the values in relevantInfo dictionary
-for key in relevantInfo:
-    if relevantInfo[key]:
-        print(f"{key}: {relevantInfo[key]}")
+    # Now you can access the values in relevantInfo dictionary
+    for key in relevantInfo:
+        if relevantInfo[key]:
+            print(f"{key}: {relevantInfo[key]}")
+
+# Example usage:
+songPath = openSongAtLocation("songLocation.txt")
+ffprobe(songPath)

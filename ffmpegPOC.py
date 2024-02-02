@@ -1,28 +1,61 @@
 import subprocess
 import numpy as np
+import json
 
 def ffprobe(songPath):
     """
     Run ffprobe command to get media file information.
     """
-    command = ['ffprobe', '-v', 'error', '-print_format', 'flat', '-show_format', '-show_streams', songPath]
+    command = ['ffprobe', '-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', songPath]
     result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = result.communicate()
     
-    relevant_info = ""
-
     if err:
         print("Error occurred:", err)
+        return None
     else:
         # Decode the output to a string
         output_str = out.decode("utf-8")
 
-        # Filter relevant information
-        for line in output_str.split('\n'):
-            if not line.startswith("format.tag") and not line.startswith("streams.stream.1"):
-                relevant_info += line + '\n'
+        # Parse the JSON output
+        rawJsonOutput = json.loads(output_str)
 
-    return relevant_info
+        audioInfo = {'format_name': '',
+                    'size': '',
+                    'bit_rate': '',
+                    'duration_ts': '',
+                    'bits_per_raw_sample': '',
+                    'sample_fmt': '',
+                    'sample_rate': ''}
+
+    if rawJsonOutput:
+        # Accessing format information
+        format_info = rawJsonOutput.get("format", {})
+        if format_info:
+            for key in audioInfo:
+                audioInfo[key] = format_info.get(key, "")
+
+        # Accessing stream information
+        streams = rawJsonOutput.get("streams", [])
+        for stream in streams:
+            for key in audioInfo:
+                if key in stream:
+                    audioInfo[key] = stream[key]
+            break  # Process only the first stream
+
+    else:
+        print("FFprobe failed to retrieve media information.")
+
+    return audioInfo
+
+def printInfoDictionary(audioInfo):
+    outputText = ""
+    for key in audioInfo:
+        if audioInfo[key]:
+            print(f"{key}: {audioInfo[key]}")
+            outputText += f"{key}: {audioInfo[key]}\n"
+
+    return outputText
 
 def openSongAtLocation(filePath):
     # Read the location of the audio file from "songLocation.txt"
@@ -56,12 +89,8 @@ def extractSamples(file_path):
 
 songPath = openSongAtLocation("songLocation.txt")
 
-outputText = ffprobe(songPath)
-
 l, r = extractSamples(songPath)
 print("Left Channel Samples:", l[:20])
 print("Right Channel Samples:", r[:20])
 
-writeOutput(outputText)
-
-print(outputText)
+writeOutput(printInfoDictionary(ffprobe(songPath)))
