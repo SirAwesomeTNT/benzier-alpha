@@ -1,4 +1,5 @@
 import subprocess
+import numpy as np
 
 def ffprobe(songPath):
     """
@@ -23,17 +24,6 @@ def ffprobe(songPath):
 
     return relevant_info
 
-def ffmpeg(songPath, command):
-    """
-    Run FFmpeg command directly on the audio file specified in "songLocation.txt".
-    """
-    try:
-        # Execute the FFmpeg command
-        result = subprocess.run(command + [songPath], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        return result.stdout, result.stderr
-    except subprocess.CalledProcessError as e:
-        return None, e.stderr
-
 def openSongAtLocation(filePath):
     # Read the location of the audio file from "songLocation.txt"
     with open(filePath, "r") as file:
@@ -45,9 +35,32 @@ def writeOutput(outputText):
     with open("output.txt", "w") as output_file:
         output_file.write(outputText)
 
+def extractSamples(file_path):
+    try:
+        # Execute FFmpeg command to extract raw PCM audio samples
+        command = ['ffmpeg', '-i', file_path, '-vn', '-af', 'pan=stereo|c0=c0|c1=c1', '-f', 'f32le', '-']
+        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raw_audio_data = result.stdout
+        
+        # Convert raw audio data to NumPy array of int16 type
+        audio_np = np.frombuffer(raw_audio_data, dtype='float32')
+        
+        # Separate left and right channel samples
+        l_samples = audio_np[::2]  # Every other sample starting from index 0 (left channel)
+        r_samples = audio_np[1::2]  # Every other sample starting from index 1 (right channel)
+        
+        return l_samples, r_samples
+    except subprocess.CalledProcessError as e:
+        print("Error:", e.stderr)
+        return None, None
+
 songPath = openSongAtLocation("songLocation.txt")
 
 outputText = ffprobe(songPath)
+
+l, r = extractSamples(songPath)
+print("Left Channel Samples:", l[:20])
+print("Right Channel Samples:", r[:20])
 
 writeOutput(outputText)
 
