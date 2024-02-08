@@ -1,7 +1,9 @@
+filename: /Users/fmatt/Desktop/AllMusic/WatchFolder/Playlist/Sub Focus - Waiting (VIP).flac
 format_name: flac
-size: 35486137
-bit_rate: 929240
-duration_ts: 13472844
+size: 32468039
+bit_rate: 1023440
+duration: 253.795306
+duration_ts: 11192373
 bits_per_raw_sample: 16
-sample_fmt: s16
 sample_rate: 44100
+sample_fmt: s16

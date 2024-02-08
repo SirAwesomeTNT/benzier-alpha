@@ -20,13 +20,15 @@ def ffprobe(songPath):
         # Parse the JSON output
         rawJsonOutput = json.loads(output_str)
 
-        audioInfo = {'format_name': '',
+        audioInfo = {'filename': '',
+                    'format_name': '',
                     'size': '',
                     'bit_rate': '',
+                    'duration': '',
                     'duration_ts': '',
                     'bits_per_raw_sample': '',
-                    'sample_fmt': '',
-                    'sample_rate': ''}
+                    'sample_rate': '',
+                    'sample_fmt': ''}
 
     if rawJsonOutput:
         # Accessing format information
