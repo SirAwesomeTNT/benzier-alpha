@@ -1,5 +1,6 @@
 import subprocess
 import numpy as np
+import matplotlib.pyplot as plt
 import json
 
 def ffprobe(songPath):
@@ -73,11 +74,11 @@ def writeOutput(outputText):
 def extractSamples(file_path):
     try:
         # Execute FFmpeg command to extract raw PCM audio samples
-        command = ['ffmpeg', '-i', file_path, '-vn', '-af', 'pan=stereo|c0=c0|c1=c1', '-f', 'f32le', '-']
+        command = ['ffmpeg', '-i', file_path, '-vn', '-f', 'f32le', '-']
         result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         raw_audio_data = result.stdout
         
-        # Convert raw audio data to NumPy array of int16 type
+        # Convert raw audio data to NumPy array of float32 type
         audio_np = np.frombuffer(raw_audio_data, dtype='float32')
         
         # Separate left and right channel samples
@@ -96,3 +97,22 @@ print("Left Channel Samples:", l[:20])
 print("Right Channel Samples:", r[:20])
 
 writeOutput(printInfoDictionary(ffprobe(songPath)))
+
+# Generate time axis based on the number of samples and sample rate
+num_samples = len(l)  # Assuming l and r have the same length
+sample_rate = 44100  # Assuming a sample rate of 44100 Hz
+duration = num_samples / sample_rate
+time_axis = np.linspace(0, duration, num_samples)
+
+# Plot left and right channel samples
+plt.figure(figsize=(10, 6))
+
+plt.plot(time_axis[::10], l[::10], label='Left Channel')
+plt.plot(time_axis[::10], r[::10], label='Right Channel')
+
+plt.xlabel('Time (seconds)')
+plt.ylabel('Amplitude')
+plt.title('Left and Right Channel Samples')
+plt.legend()
+plt.grid(True)
+plt.show()
