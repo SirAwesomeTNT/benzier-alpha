@@ -90,7 +90,7 @@ def extractSamples(file_path):
         print("Error:", e.stderr)
         return None, None
 
-songPath = openSongAtLocation("songLocation.txt")
+songPath = openSongAtLocation("bezier-alpha/songLocation.txt")
 
 l, r = extractSamples(songPath)
 print("Left Channel Samples:", l[:20])
@@ -107,8 +107,8 @@ time_axis = np.linspace(0, duration, num_samples)
 # Plot left and right channel samples
 plt.figure(figsize=(10, 6))
 
-plt.plot(time_axis[::10], l[::10], label='Left Channel')
-plt.plot(time_axis[::10], r[::10], label='Right Channel')
+plt.plot(time_axis[:20:], l[:20:], label='Left Channel')
+plt.plot(time_axis[:20:], r[:20:], label='Right Channel')
 
 plt.xlabel('Time (seconds)')
 plt.ylabel('Amplitude')
